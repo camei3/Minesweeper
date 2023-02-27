@@ -9,6 +9,7 @@ public void setup() {
   size(600, 600);
   Interactive.make(this);
   newGrid();
+  textAlign(CENTER);
 }
 
 public boolean isInGrid(int x, int y) {
@@ -27,7 +28,8 @@ public void populateMines(int total) {
   if (total <= ROWS * COLS) {
     for (int i = 0; i < total; i++) {
       int tileNo = (int)(Math.random()*safeTiles.size());
-      safeTiles.get(tileNo).setMine();
+      Button target = safeTiles.get(tileNo);
+      target.setMine();
       safeTiles.remove(tileNo);
     }
   }
@@ -39,6 +41,7 @@ public class Button {
   private float x, y, width, height;
   private int row, col;
   private boolean on, isMine;
+  private int adjMines;
   public Button(int r, int c) {
     row = r;
     col = c;
@@ -47,38 +50,68 @@ public class Button {
     width = 600/ROWS;
     height = 600/COLS;
     on = false;
+    adjMines = 0;
     Interactive.add(this);
     safeTiles.add(this);
   }
   public void mousePressed() {
-    for (int i = row-1; i <= row+1; i++) {
-      for (int j = col-1; j <= col+1; j++) {
-        if (isInGrid(i,j)) {
-          buttons[i][j].toggle();
+    toggle();
+    countAdjMines();  
+    
+    if (adjMines == 0) {
+      
+      for (int i = row-1; i <= row+1; i++) {
+        for (int j = col-1; j <= col+1; j++) {
+          if (isInGrid(i,j)) {
+            buttons[i][j].mousePressed();
+          }
         }
       }
+      
     }
+    
   }
   public void draw() {
     if (on) {
       if (isMine) {
         fill(255,0,0);
       } else {
-        fill(255);
+        fill(255);           
       }
     } else {
       fill(50);
     }
     rect(x, y, width, height);
+    if (on && adjMines != 0) {
+      fill(0);
+      text(adjMines, x+300/ROWS,y+300/COLS); 
+    }
   }
   public boolean isOn() {
     return on;
   }
   public void toggle() {
-    on = !on;
+    on = true;
   }
   public void setMine() {
     isMine = true;
+  }
+  public boolean hasMine() {
+    return isMine;
+  }
+  public void countAdjMines() {
+    adjMines = 0;
+    if (isMine) {
+      return;
+    }
+    for (int i = row-1; i <= row+1; i++) {
+      for (int j = col-1; j <= col+1; j++) {
+        if (isInGrid(i,j) && buttons[i][j].hasMine()) {
+          adjMines++;
+        }
+      }
+    
+    }
   }
 }
 public void keyPressed() {
