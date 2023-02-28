@@ -29,6 +29,28 @@ public void populateMines(int total) {
     for (int i = 0; i < total; i++) {
       int tileNo = (int)(Math.random()*safeTiles.size());
       Button target = safeTiles.get(tileNo);
+      
+      for (int r = target.getR()-1; r <= target.getR()+1; r++) {
+        for (int c = target.getC()-1; c <= target.getC()+1; c++) {
+          if (isInGrid(r,c)) {
+            buttons[r][c].addAdj();
+          }
+        }       
+      }
+    //public void countAdjMines() {
+    //  adjMines = 0;
+    //  if (isMine) {
+    //    return;
+    //  }
+    //  for (int i = row-1; i <= row+1; i++) {
+    //    for (int j = col-1; j <= col+1; j++) {
+    //      if (isInGrid(i,j) && buttons[i][j].hasMine()) {
+    //        adjMines++;
+    //      }
+    //    }
+      
+    //  }
+    //}      
       target.setMine();
       safeTiles.remove(tileNo);
     }
@@ -55,15 +77,15 @@ public class Button {
     safeTiles.add(this);
   }
   public void mousePressed() {
-    toggle();
-    countAdjMines();  
+    toggle();  
     
     if (adjMines == 0) {
       
       for (int i = row-1; i <= row+1; i++) {
         for (int j = col-1; j <= col+1; j++) {
-          if (isInGrid(i,j)) {
+          if (isInGrid(i,j) && !buttons[i][j].isOn()) {
             buttons[i][j].mousePressed();
+            System.out.println(i + " " + j);
           }
         }
       }
@@ -96,22 +118,17 @@ public class Button {
   public void setMine() {
     isMine = true;
   }
+  public void addAdj() {
+    adjMines++;
+  }  
   public boolean hasMine() {
     return isMine;
   }
-  public void countAdjMines() {
-    adjMines = 0;
-    if (isMine) {
-      return;
-    }
-    for (int i = row-1; i <= row+1; i++) {
-      for (int j = col-1; j <= col+1; j++) {
-        if (isInGrid(i,j) && buttons[i][j].hasMine()) {
-          adjMines++;
-        }
-      }
-    
-    }
+  public int getR() {
+    return row;
+  }
+  public int getC() {
+    return col;
   }
 }
 public void keyPressed() {
@@ -129,5 +146,5 @@ public void newGrid() {
       buttons[i][j] = new Button(i,j);
     }
   }
-  populateMines(16);
+  populateMines(4);
 }
