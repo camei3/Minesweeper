@@ -1,18 +1,21 @@
 import de.bezier.guido.*;
 
-public final static int ROWS = 16;
-public final static int COLS = 16;
-public final static int MINES = 12;
+public final static int ROWS = 12;
+public final static int COLS = 12;
+public final static int MINES = ROWS*COLS/12;
 public final static int SCREEN_WIDTH = 600;
 public final static int SCREEN_HEIGHT = 600;
+
 private Button[][] buttons;
 private ArrayList <Button> safeTiles;
+
 public int flags = 0;
+public int gameStatus = 0;
+
 public void setup() {
-  size(600, 600); //weird varibles, note to manually fix final variables (thanks a lot, guido)
+  size(600, 600); //weird varibles,  note to manually fix final variables (thanks a lot, guido)
   Interactive.make(this);
   background(0); 
-  textSize(SCREEN_HEIGHT/ROWS/2);
   textAlign(CENTER, CENTER);  
   safeTiles = new ArrayList <Button>();
   buttons = new Button[ROWS][COLS];  
@@ -33,9 +36,10 @@ public boolean isInGrid(int x, int y) {
 
 
 public void draw() {
-  ////stroke(120,20);
-  ////strokeWeight(600/3);
-  //text(MINES-flags,600/2,600/2);
+  background(0);
+  stroke(255);
+  textSize(600/3);
+  text(MINES-flags,600/2,600/2);
 }
 
 public class Button {
@@ -82,19 +86,23 @@ public class Button {
   public void draw() {
     if (on) {
       if (isMine) {
-        fill(255, 0, 0);
+        fill(200, 0, 0,200);
       } else {
-        fill(255);
+        fill(125,200);
       }
     } else {
-      fill(50);
+      fill(50,200);
     }
+    stroke(75,200);
+    strokeWeight(1);
     rect(x, y, width, height);
+    
+    textSize(SCREEN_HEIGHT/ROWS/2);    
     if (on && !isMine && adjMines != 0) {
       fill(0);
       text(adjMines, x+width/2, y+height/2);
     } else if (isFlagged) {
-      fill(255);
+      fill(125);
       text('?', x+width/2, y+height/2);
     }
   }
@@ -174,4 +182,5 @@ public void newGrid(int total) {
       }
     }
   }
+  gameStatus = 0;
 }
