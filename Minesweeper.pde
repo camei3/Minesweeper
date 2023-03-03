@@ -1,5 +1,5 @@
 import de.bezier.guido.*;
-
+//should try splitting into separate for easy reading
 public final static int ROWS = 12;
 public final static int COLS = 12;
 public final static int MINES = ROWS*COLS/12;
