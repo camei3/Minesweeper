@@ -50,7 +50,7 @@ public void draw() {
     //lives text
     String livesString = "";
     for (int i = 0; i < lives; i++) {
-      livesString += '\u2665';
+      livesString += "♥"; //\u2665
     }
     text(livesString,SCREEN_WIDTH/2,SCREEN_HEIGHT/5);  
     
