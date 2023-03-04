@@ -2,7 +2,7 @@ import de.bezier.guido.*;
 //should try splitting into separate for easy reading
 public final static int ROWS = 24;
 public final static int COLS = 24;
-public final static int MINES = ROWS*COLS/120;
+public final static int MINES = (int)(ROWS*COLS/120);
 public final static int SCREEN_WIDTH = 800;
 public final static int SCREEN_HEIGHT = 800;
 
@@ -50,7 +50,7 @@ public void draw() {
     //lives text
     String livesString = "";
     for (int i = 0; i < lives; i++) {
-      livesString += '\u2665';
+      livesString += '♥'; //\u2665
     }
     text(livesString,SCREEN_WIDTH/2,SCREEN_HEIGHT/5);  
     
