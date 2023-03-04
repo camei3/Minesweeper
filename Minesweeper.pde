@@ -1,19 +1,21 @@
 import de.bezier.guido.*;
 //should try splitting into separate for easy reading
-public final static int ROWS = 12;
-public final static int COLS = 12;
-public final static int MINES = ROWS*COLS/12;
-public final static int SCREEN_WIDTH = 600;
-public final static int SCREEN_HEIGHT = 600;
+public final static int ROWS = 24;
+public final static int COLS = 24;
+public final static int MINES = ROWS*COLS/120;
+public final static int SCREEN_WIDTH = 800;
+public final static int SCREEN_HEIGHT = 800;
 
 private Button[][] buttons;
 private ArrayList <Button> safeTiles;
 
 public int flags = 0;
-public int gameStatus = 0;
-
+public int gameStatus = 0; //0 is game, 1 is win, -1 is lose
+public int lives = 3;
+public int opacity = 200;
+public int remainingTiles = ROWS*COLS-MINES;
 public void setup() {
-  size(600, 600); //weird varibles,  note to manually fix final variables (thanks a lot, guido)
+  size(800, 800); //weird varibles,  note to manually fix final variables (thanks a lot, guido)
   Interactive.make(this);
   background(0); 
   textAlign(CENTER, CENTER);  
@@ -37,9 +39,30 @@ public boolean isInGrid(int x, int y) {
 
 public void draw() {
   background(0);
-  stroke(255);
-  textSize(600/3);
-  text(MINES-flags,600/2,600/2);
+  
+  if (gameStatus == 0) {
+    fill(255);
+    textSize(SCREEN_HEIGHT/3);
+    text(MINES-flags,SCREEN_WIDTH/2,SCREEN_HEIGHT/2);
+    fill(255,0,0);
+    textSize(SCREEN_HEIGHT/10);
+    
+    //lives text
+    String livesString = "";
+    for (int i = 0; i < lives; i++) {
+      livesString += '\u2665';
+    }
+    text(livesString,SCREEN_WIDTH/2,SCREEN_HEIGHT/5);  
+    
+  } else if (gameStatus == 1) {
+    fill(255,255,0);
+    textSize(SCREEN_HEIGHT/5);
+    text("WIN",SCREEN_WIDTH/2,SCREEN_HEIGHT/2);
+  } else if (gameStatus == -1) {
+    fill(255,0,0);
+    textSize(SCREEN_HEIGHT/5);
+    text("LOSE",SCREEN_WIDTH/2,SCREEN_HEIGHT/2);
+  }
 }
 
 public class Button {
@@ -50,20 +73,41 @@ public class Button {
   public Button(int r, int c) {
     row = r;
     col = c;
-    y = SCREEN_HEIGHT/ROWS*r;
-    x = SCREEN_WIDTH/COLS*c;
-    width = SCREEN_WIDTH/COLS;
-    height = SCREEN_HEIGHT/ROWS;
+    y = 1.0*SCREEN_HEIGHT/ROWS*r;
+    x = 1.0*SCREEN_WIDTH/COLS*c;
+    width = 1.0*SCREEN_WIDTH/COLS;
+    height = 1.0*SCREEN_HEIGHT/ROWS;
     on = false;
     adjMines = 0;
     Interactive.add(this);
     safeTiles.add(this);
   }
   public void mousePressed() {
-    if (mouseButton == LEFT && !isFlagged && !on) {
-      toggle(true);
-
-      if (adjMines < 1) {
+    if (gameStatus == -1 || gameStatus == 1) {
+      return;
+    }
+    
+    if (mouseButton == LEFT && !isFlagged && !on) { //revealing only nonflagged off
+      toggle(true); //reveal!
+      remainingTiles--;
+      if (isMine) { //hit a mine
+        remainingTiles++;
+        isFlagged = true;
+        flags++;
+        lives--;
+        if (lives < 1) { //lose case
+          for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+              Button current = buttons[r][c];
+              if (current.hasMine() && !current.isOn()) {
+                current.toggle(true);
+              }
+            }
+          }
+          gameStatus = -1;
+        }
+        
+      } else if (adjMines < 1) { //hit a blank
 
         for (int i = row-1; i <= row+1; i++) {
           for (int j = col-1; j <= col+1; j++) {
@@ -73,7 +117,8 @@ public class Button {
           }
         }
       }
-    } else if (mouseButton == RIGHT && !on) {
+      
+    } else if (mouseButton == RIGHT && !on) { //flagging only off
       if (isFlagged) {
         isFlagged = false;
         flags--;
@@ -82,29 +127,42 @@ public class Button {
         flags++;
       }
     }
+    
+    if (remainingTiles == 0) {
+      gameStatus = 1;
+    }
   }
   public void draw() {
     if (on) {
       if (isMine) {
-        fill(200, 0, 0,200);
+        fill(255, 0, 0,opacity);
       } else {
-        fill(125,200);
+        fill(150,opacity);
       }
     } else {
-      fill(50,200);
+      fill(50,opacity);
     }
-    stroke(75,200);
-    strokeWeight(1);
+    if (gameStatus == 0) {
+      stroke(75,opacity);
+    } else {
+      noStroke();
+    }
     rect(x, y, width, height);
     
-    textSize(SCREEN_HEIGHT/ROWS/2);    
-    if (on && !isMine && adjMines != 0) {
+    textSize(SCREEN_HEIGHT/ROWS/2);   
+    if (on && !isMine && adjMines != 0) { //text for adj mines
       fill(0);
       text(adjMines, x+width/2, y+height/2);
-    } else if (isFlagged) {
-      fill(125);
-      text('?', x+width/2, y+height/2);
+    } else if (isFlagged) { //text for mines themselves 
+      if (on) {
+        fill(0);
+        text('!',x+width/2,y+height/2);
+      } else {
+        fill(150);
+        text('?', x+width/2, y+height/2);
+      }
     }
+    
   }
   public boolean isOn() {
     return on;
@@ -145,6 +203,8 @@ public void keyPressed() {
 
 public void newGrid(int total) {
   flags = 0;
+  lives = 3;
+  remainingTiles = ROWS*COLS-MINES;
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
       Button target = buttons[i][j];
