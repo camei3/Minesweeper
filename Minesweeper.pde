@@ -5,7 +5,6 @@ public final static int COLS = 24;
 public final static int MINES = ROWS*COLS/12;
 public final static int SCREEN_WIDTH = 800;
 public final static int SCREEN_HEIGHT = 800;
-
 private Button[][] buttons;
 private ArrayList <Button> safeTiles;
 
@@ -14,6 +13,8 @@ public int gameStatus = 0; //0 is game, 1 is win, -1 is lose
 public int lives = 3;
 public int opacity = 200;
 public int remainingTiles = ROWS*COLS-MINES;
+public boolean toggleBG = true;
+
 public void setup() {
   size(800, 800); //weird varibles,  note to manually fix final variables (thanks a lot, guido)
   Interactive.make(this);
@@ -39,7 +40,9 @@ public boolean isInGrid(int x, int y) {
 
 public void draw() {
   background(0);
-  
+  if (!toggleBG) {
+    return;
+  }
   if (gameStatus == 0) {
     fill(255);
     textSize(SCREEN_HEIGHT/3);
@@ -50,7 +53,7 @@ public void draw() {
     //lives text
     String livesString = "";
     for (int i = 0; i < lives; i++) {
-      livesString += "♥"; //\u2665
+      livesString += '\u2665';
     }
     text(livesString,SCREEN_WIDTH/2,SCREEN_HEIGHT/5);  
     
@@ -113,6 +116,7 @@ public class Button {
             }
           }
           gameStatus = -1;
+          toggleBG = true;
         }
         
       } else if (adjMines < 1) { //hit a blank
@@ -138,6 +142,7 @@ public class Button {
     
     if (remainingTiles == 0) {
       gameStatus = 1;
+      toggleBG = true;
     }
   }
   public void draw() {
@@ -204,6 +209,9 @@ public void keyPressed() {
   if (key == ' ') {
     newGrid(MINES);
   }
+  if (key == '\t') {
+    toggleBG = !toggleBG;
+  }
 }
 
 public void newGrid(int total) {
@@ -248,4 +256,5 @@ public void newGrid(int total) {
     }
   }
   gameStatus = 0;
+  toggleBG = true;
 }
