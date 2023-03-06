@@ -209,7 +209,7 @@ public void keyPressed() {
   if (key == ' ') {
     newGrid(MINES);
   }
-  if (key == '\t') {
+  if (keyCode == SHIFT) {
     toggleBG = !toggleBG;
   }
 }
